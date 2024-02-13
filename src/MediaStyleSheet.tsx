@@ -20,20 +20,33 @@ export function createMediaStyleSheet(mediaOptions: MediaOptions) {
     };
 
     type MediaNamedStyles<T> = { [P in keyof T]: MediaViewStyle | MediaTextStyle | MediaImageStyle };
+
     return class MediaStyleSheet {
         static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(styleSheet: T) {
             objectKeys(styleSheet).forEach(key => {
-                let newStyle = { ...styleSheet[key] };
-                objectKeys(mediaOptions).forEach(x => {
-                    if (mediaOptions[x]()) {
-                        newStyle = { ...newStyle, ...styleSheet[key][x] };
-                    }
-                    delete newStyle[x];
-                });
-
-                styleSheet[key] = newStyle;
+                styleSheet[key] = this.flattenStyleWithMediaStyles(styleSheet, key);
             });
             return StyleSheet.create(styleSheet);
+        }
+
+        private static flattenStyleWithMediaStyles<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(
+            styleSheet: T,
+            key: keyof T,
+        ) {
+            let newStyle = { ...styleSheet[key] };
+
+            Object.keys(mediaOptions).forEach(mediaKey => {
+                if (this.hasMediaOption(mediaKey)) {
+                    newStyle = { ...newStyle, ...styleSheet[key][mediaKey] };
+                }
+                delete newStyle[mediaKey];
+            });
+
+            return newStyle;
+        }
+
+        private static hasMediaOption(mediaKey: string): boolean {
+            return mediaOptions[mediaKey]();
         }
     };
 }
