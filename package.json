@@ -1,0 +1,44 @@
+{
+  "name": "media-style-sheet",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "source": "src/index.tsx",
+  "react-native": "src/index.tsx",
+  "scripts": {
+    "clean": "rm -rf node_modules",
+    "bundle": "tsup",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "@babel/runtime": "^7.20.0",
+    "@testing-library/react": "^14.2.1",
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.19",
+    "@types/react-test-renderer": "^18.0.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.6.3",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "2.8.8",
+    "react": "18.2.0",
+    "react-dom": "^18.2.0",
+    "react-test-renderer": "^18.2.0",
+    "ts-jest": "^29.1.2",
+    "tsup": "^8.0.2",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "!dist/*.test.d.ts",
+    "src/index.tsx"
+  ]
+}
