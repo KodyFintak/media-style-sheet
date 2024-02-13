@@ -1,38 +1,37 @@
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 
-interface MediaViewStyle extends ViewStyle {
-    handheld?: ViewStyle;
-    tablet?: ViewStyle;
-}
+export type MediaOptions = {
+    [mediaKey: string]: () => boolean;
+};
 
-interface MediaTextStyle extends TextStyle {
-    handheld?: TextStyle;
-    tablet?: TextStyle;
-}
+export function createMediaStyleSheet(mediaOptions: MediaOptions) {
+    type MediaKeys = keyof typeof mediaOptions;
 
-interface MediaImageStyle extends ImageStyle {
-    handheld?: ImageStyle;
-    tablet?: ImageStyle;
-}
+    type MediaViewStyle = ViewStyle & {
+        [s in MediaKeys]: ViewStyle;
+    };
 
-type MediaNamedStyles<T> = { [P in keyof T]: MediaViewStyle | MediaTextStyle | MediaImageStyle };
+    type MediaTextStyle = TextStyle & {
+        [s in MediaKeys]: TextStyle;
+    };
 
-export function createMediaStyleSheet(param: { isHandheld: () => boolean; isTablet: () => boolean }) {
+    type MediaImageStyle = ImageStyle & {
+        [s in MediaKeys]: ImageStyle;
+    };
+
+    type MediaNamedStyles<T> = { [P in keyof T]: MediaViewStyle | MediaTextStyle | MediaImageStyle };
     return class MediaStyleSheet {
         static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(styleSheet: T) {
             objectKeys(styleSheet).forEach(key => {
-                let newStyle = {...styleSheet[key]};
-                if (param.isHandheld()) {
-                    newStyle = {...newStyle, ...styleSheet[key].handheld};
-                }
-                if (param.isTablet()) {
-                    newStyle = {...newStyle, ...styleSheet[key].tablet};
-                }
-                delete newStyle.handheld;
-                delete newStyle.tablet;
+                let newStyle = { ...styleSheet[key] };
+                objectKeys(mediaOptions).forEach(x => {
+                    if (mediaOptions[x]()) {
+                        newStyle = { ...newStyle, ...styleSheet[key][x] };
+                    }
+                    delete newStyle[x];
+                });
 
                 styleSheet[key] = newStyle;
-
             });
             return StyleSheet.create(styleSheet);
         }
