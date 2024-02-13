@@ -21,14 +21,18 @@ export function createMediaStyleSheet(param: { isHandheld: () => boolean; isTabl
     return class MediaStyleSheet {
         static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(styleSheet: T) {
             objectKeys(styleSheet).forEach(key => {
-                const deviceOverride = param.isHandheld() ? styleSheet[key].handheld : styleSheet[key].tablet;
-                delete styleSheet[key].handheld;
-                delete styleSheet[key].tablet;
+                let newStyle = {...styleSheet[key]};
+                if (param.isHandheld()) {
+                    newStyle = {...newStyle, ...styleSheet[key].handheld};
+                }
+                if (param.isTablet()) {
+                    newStyle = {...newStyle, ...styleSheet[key].tablet};
+                }
+                delete newStyle.handheld;
+                delete newStyle.tablet;
 
-                styleSheet[key] = {
-                    ...styleSheet[key],
-                    ...deviceOverride,
-                };
+                styleSheet[key] = newStyle;
+
             });
             return StyleSheet.create(styleSheet);
         }
