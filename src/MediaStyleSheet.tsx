@@ -1,56 +1,60 @@
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 
 export type MediaOptions = {
-    [mediaKey: string]: () => boolean;
+    [key: string]: () => boolean;
 };
 
-export function createMediaStyleSheet(mediaOptions: MediaOptions) {
-    type MediaKeys = keyof typeof mediaOptions;
+type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends (x: infer I) => void ? I : never;
 
-    type MediaViewStyle = ViewStyle & {
-        [s in MediaKeys]: ViewStyle;
-    };
+type NamedStyle = ViewStyle | TextStyle | ImageStyle;
 
-    type MediaTextStyle = TextStyle & {
-        [s in MediaKeys]: TextStyle;
-    };
+export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOptions: MediaTypes) {
+    type MediaKeys = keyof MediaTypes;
+    type MediaKeyStyle<T> = { [s in MediaKeys]?: T };
 
-    type MediaImageStyle = ImageStyle & {
-        [s in MediaKeys]: ImageStyle;
-    };
+    type MediaViewStyle = ViewStyle & MediaKeyStyle<ViewStyle>;
+    type MediaTextStyle = TextStyle & MediaKeyStyle<TextStyle>;
+    type MediaImageStyle = ImageStyle & MediaKeyStyle<ImageStyle>;
 
-    type MediaNamedStyles<T> = { [P in keyof T]: MediaViewStyle | MediaTextStyle | MediaImageStyle };
+    type MediaNamedStyle = MediaViewStyle | MediaTextStyle | MediaImageStyle;
+    type MediaNamedStyles<T> = { [P in keyof T]: MediaNamedStyle };
+
+    // @ts-ignore
+    type FlattenMedia<T> = Omit<T, MediaKeys> & UnionToIntersection<T[MediaKeys]>;
+    type StyleSheet<T> = { [K in keyof T]: FlattenMedia<T[K]> };
 
     return class MediaStyleSheet {
-        static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(styleSheet: T) {
-            objectKeys(styleSheet).forEach(key => {
-                styleSheet[key] = this.flattenStyleWithMediaStyles(styleSheet, key);
+        static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(
+            styleSheet: T & MediaNamedStyles<any>,
+        ): StyleSheet<T> {
+            const finalStyleSheet = {};
+
+            Object.keys(styleSheet).forEach(key => {
+                const style = styleSheet[key];
+                const baseStyle = { ...style };
+
+                Object.keys(mediaOptions).forEach(mediaKey => {
+                    delete baseStyle[mediaKey];
+                });
+
+                let newStyle = { ...baseStyle };
+
+                Object.keys(mediaOptions).forEach(mediaKey => {
+                    if (mediaOptions[mediaKey]()) {
+                        const mediaStyle: NamedStyle = style[mediaKey] ?? {};
+                        newStyle = { ...newStyle, ...mediaStyle };
+                    }
+                });
+
+                // @ts-ignore
+                finalStyleSheet[key] = newStyle;
             });
-            return StyleSheet.create(styleSheet);
-        }
 
-        private static flattenStyleWithMediaStyles<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(
-            styleSheet: T,
-            key: keyof T,
-        ) {
-            let newStyle = { ...styleSheet[key] };
-
-            Object.keys(mediaOptions).forEach(mediaKey => {
-                if (this.hasMediaOption(mediaKey)) {
-                    newStyle = { ...newStyle, ...styleSheet[key][mediaKey] };
-                }
-                delete newStyle[mediaKey];
-            });
-
-            return newStyle;
-        }
-
-        private static hasMediaOption(mediaKey: string): boolean {
-            return mediaOptions[mediaKey]();
+            return StyleSheet.create(finalStyleSheet) as StyleSheet<T>;
         }
     };
 }
 
-function objectKeys<T extends Object>(obj: T) {
+export function objectKeys<T extends Object>(obj: T) {
     return Object.keys(obj) as Array<keyof T>;
 }
