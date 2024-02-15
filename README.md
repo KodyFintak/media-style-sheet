@@ -1,5 +1,7 @@
 # media-style-sheet
 
+Media Query Extension to React-Native StyleSheets
+
 ## Install
 
 ### yarn

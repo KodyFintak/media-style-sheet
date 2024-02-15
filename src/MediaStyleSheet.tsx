@@ -27,7 +27,7 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
         static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(
             styleSheet: T & MediaNamedStyles<any>,
         ): StyleSheet<T> {
-            const finalStyleSheet = {};
+            const finalStyleSheet = {} as StyleSheet<T>;
 
             Object.keys(styleSheet).forEach(key => {
                 const style = styleSheet[key];
@@ -50,7 +50,8 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
                 finalStyleSheet[key] = newStyle;
             });
 
-            return StyleSheet.create(finalStyleSheet) as StyleSheet<T>;
+            // @ts-ignore
+            return StyleSheet.create(finalStyleSheet);
         }
     };
 }
