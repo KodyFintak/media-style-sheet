@@ -110,5 +110,33 @@ describe('media style sheet', () => {
                 color: 'color-does-not-work-on-images',
             });
         });
+
+        it('with different types for different queries', () => {
+            const MediaThing = createMediaStyleSheet({
+                handheld: () => true,
+                tablet: () => false,
+            });
+
+            const styles = MediaThing.create({
+                text: {
+                    handheld: {
+                        width: 22,
+                    },
+                    tablet: {
+                        width: '100%',
+                    },
+                },
+            });
+
+            function MyText() {
+                return <Text style={styles.text}>Hello</Text>;
+            }
+
+            const renderAPI = render(<MyText />);
+
+            expect(renderAPI.getByText('Hello').props.style).toEqual({
+                width: 22,
+            });
+        });
     });
 });

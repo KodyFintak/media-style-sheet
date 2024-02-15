@@ -4,8 +4,6 @@ export type MediaOptions = {
     [key: string]: () => boolean;
 };
 
-type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends (x: infer I) => void ? I : never;
-
 type NamedStyle = ViewStyle | TextStyle | ImageStyle;
 
 export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOptions: MediaTypes) {
@@ -20,7 +18,7 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
     type MediaNamedStyles<T> = { [P in keyof T]: MediaNamedStyle };
 
     // @ts-ignore
-    type FlattenMedia<T> = Omit<T, MediaKeys> & UnionToIntersection<T[MediaKeys]>;
+    type FlattenMedia<T> = Omit<T, MediaKeys> & T[MediaKeys];
     type StyleSheet<T> = { [K in keyof T]: FlattenMedia<T[K]> };
 
     return class MediaStyleSheet {
