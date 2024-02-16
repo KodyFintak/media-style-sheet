@@ -2,7 +2,8 @@
 
 Media Query Extension to React-Native StyleSheets
 
-This is a drop and replace for `StyleSheet.create` that
+This is a drop and replace for `StyleSheet.create` that allows you to create custom MediaQuery like options to
+dynamically apply styles.
 
 ## Install
 
