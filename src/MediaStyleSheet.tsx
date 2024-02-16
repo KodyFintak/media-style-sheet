@@ -21,6 +21,23 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
     type FlattenMedia<T> = Omit<T, MediaKeys> & T[MediaKeys];
     type StyleSheet<T> = { [K in keyof T]: FlattenMedia<T[K]> };
 
+    function flattenMediaStyle<T>(style: (T & MediaNamedStyles<any>)[string]) {
+        const baseStyle = extractBaseStyle(style);
+
+        return Object.keys(mediaOptions)
+            .filter(mediaKey => mediaOptions[mediaKey]())
+            .reduce((finalStyle, mediaKey) => {
+                const mediaStyle: NamedStyle = style[mediaKey] ?? {};
+                return { ...finalStyle, ...mediaStyle };
+            }, baseStyle);
+    }
+
+    function extractBaseStyle<T>(style: (T & MediaNamedStyles<any>)[string]): NamedStyle {
+        const baseStyle = { ...style };
+        Object.keys(mediaOptions).forEach(mediaKey => delete baseStyle[mediaKey]);
+        return baseStyle;
+    }
+
     return class MediaStyleSheet {
         static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(
             styleSheet: T & MediaNamedStyles<any>,
@@ -30,28 +47,11 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
             Object.keys(styleSheet).forEach(key => {
                 const style = styleSheet[key];
                 // @ts-ignore
-                finalStyleSheet[key] = this.flattenMediaStyle(style);
+                finalStyleSheet[key] = flattenMediaStyle(style);
             });
 
             // @ts-ignore
             return StyleSheet.create(finalStyleSheet);
-        }
-
-        private static flattenMediaStyle<T>(style: (T & MediaNamedStyles<any>)[string]) {
-            const baseStyle = this.extractBaseStyle(style);
-
-            return Object.keys(mediaOptions)
-                .filter(mediaKey => mediaOptions[mediaKey]())
-                .reduce((finalStyle, mediaKey) => {
-                    const mediaStyle: NamedStyle = style[mediaKey] ?? {};
-                    return { ...finalStyle, ...mediaStyle };
-                }, baseStyle);
-        }
-
-        private static extractBaseStyle<T>(style: (T & MediaNamedStyles<any>)[string]): NamedStyle {
-            const baseStyle = { ...style };
-            Object.keys(mediaOptions).forEach(mediaKey => delete baseStyle[mediaKey]);
-            return baseStyle;
         }
     };
 }
