@@ -29,30 +29,28 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
 
             Object.keys(styleSheet).forEach(key => {
                 const style = styleSheet[key];
-                let newStyle = this.extractBaseStyle(style);
-
-                Object.keys(mediaOptions)
-                    .filter(mediaKey => mediaOptions[mediaKey]())
-                    .forEach(mediaKey => {
-                        const mediaStyle: NamedStyle = style[mediaKey] ?? {};
-                        newStyle = { ...newStyle, ...mediaStyle };
-                    });
-
                 // @ts-ignore
-                finalStyleSheet[key] = newStyle;
+                finalStyleSheet[key] = this.flattenMediaStyle(style);
             });
 
             // @ts-ignore
             return StyleSheet.create(finalStyleSheet);
         }
 
-        private static extractBaseStyle<T>(style: (T & MediaNamedStyles<any>)[string]) {
+        private static flattenMediaStyle<T>(style: (T & MediaNamedStyles<any>)[string]) {
+            const baseStyle = this.extractBaseStyle(style);
+
+            return Object.keys(mediaOptions)
+                .filter(mediaKey => mediaOptions[mediaKey]())
+                .reduce((finalStyle, mediaKey) => {
+                    const mediaStyle: NamedStyle = style[mediaKey] ?? {};
+                    return { ...finalStyle, ...mediaStyle };
+                }, baseStyle);
+        }
+
+        private static extractBaseStyle<T>(style: (T & MediaNamedStyles<any>)[string]): NamedStyle {
             const baseStyle = { ...style };
-
-            Object.keys(mediaOptions).forEach(mediaKey => {
-                delete baseStyle[mediaKey];
-            });
-
+            Object.keys(mediaOptions).forEach(mediaKey => delete baseStyle[mediaKey]);
             return baseStyle;
         }
     };
