@@ -89,3 +89,21 @@ pass `{ tablet: () => isTablet(), mobile: () => isMobile() }`
   true.
     - Note: If multiple `mediaQuery` function returns true, the last one will override any previously defined styles in
       the merge
+
+## Using `mediaOptions` `tablet` and `mobile`
+
+We found using the
+library [react-native-device-info](https://github.com/react-native-device-info/react-native-device-info) an easy way to
+create an implementation of isTablet and isMobile.
+
+```typescript jsx
+import DeviceInfo from 'react-native-device-info';
+
+export function isTablet(): boolean {
+    return DeviceInfo.isTablet();
+}
+
+export function isMobile(): boolean {
+    return !isTablet();
+}
+```
