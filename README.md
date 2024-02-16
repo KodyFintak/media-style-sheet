@@ -66,3 +66,26 @@ This will provide a column based layout on mobile and a row based layout on tabl
 
 ## Documentation
 
+### createMediaStyleSheet
+
+Creates a class `MediaStyleSheet` that is a thin wrapper around [StyleSheet](https://reactnative.dev/docs/stylesheet)
+that includes MediaQuery like dynamic styles.
+
+#### Parameters
+
+- mediaOptions: object that is a map of a `mediaOptionKey` to a `mediaQuery`
+    - `mediaOptionKey`: string of `mediaOption` to use in your stylesheet
+    - `mediaQuery`: function that returns true if `mediaOption` should be applied to style
+
+example: For MediaOptions `tablet` and `mobile` you would
+pass `{ tablet: () => isTablet(), mobile: () => isMobile() }`
+
+#### Returns
+
+`MediaStyleSheet` class that has the following properties:
+
+- `create`: Thin wrapper around [StyleSheet.create](https://reactnative.dev/docs/stylesheet#create) with the added
+  behavior of applying styles based on the `mediaOptions` passed in and whether their `mediaQuery` functions return
+  true.
+    - Note: If multiple `mediaQuery` function returns true, the last one will override any previously defined styles in
+      the merge
