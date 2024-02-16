@@ -29,20 +29,14 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
 
             Object.keys(styleSheet).forEach(key => {
                 const style = styleSheet[key];
-                const baseStyle = { ...style };
+                let newStyle = this.extractBaseStyle(style);
 
-                Object.keys(mediaOptions).forEach(mediaKey => {
-                    delete baseStyle[mediaKey];
-                });
-
-                let newStyle = { ...baseStyle };
-
-                Object.keys(mediaOptions).forEach(mediaKey => {
-                    if (mediaOptions[mediaKey]()) {
+                Object.keys(mediaOptions)
+                    .filter(mediaKey => mediaOptions[mediaKey]())
+                    .forEach(mediaKey => {
                         const mediaStyle: NamedStyle = style[mediaKey] ?? {};
                         newStyle = { ...newStyle, ...mediaStyle };
-                    }
-                });
+                    });
 
                 // @ts-ignore
                 finalStyleSheet[key] = newStyle;
@@ -51,9 +45,15 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
             // @ts-ignore
             return StyleSheet.create(finalStyleSheet);
         }
-    };
-}
 
-export function objectKeys<T extends Object>(obj: T) {
-    return Object.keys(obj) as Array<keyof T>;
+        private static extractBaseStyle<T>(style: (T & MediaNamedStyles<any>)[string]) {
+            const baseStyle = { ...style };
+
+            Object.keys(mediaOptions).forEach(mediaKey => {
+                delete baseStyle[mediaKey];
+            });
+
+            return baseStyle;
+        }
+    };
 }
