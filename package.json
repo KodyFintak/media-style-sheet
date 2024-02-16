@@ -1,7 +1,7 @@
 {
   "name": "media-style-sheet",
   "description": "Media Query Extension to React-Native StyleSheets",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "author": "Adam Whaley & Kody Fintak",
   "repository": "https://github.com/KodyFintak/media-style-sheet",
   "main": "dist/index.js",
