@@ -42,16 +42,14 @@ export function createMediaStyleSheet<MediaTypes extends MediaOptions>(mediaOpti
         static create<T extends MediaNamedStyles<T> | MediaNamedStyles<any>>(
             styleSheet: T & MediaNamedStyles<any>,
         ): StyleSheet<T> {
-            const finalStyleSheet = {} as StyleSheet<T>;
+            const finalStyleSheet = {};
 
             Object.keys(styleSheet).forEach(key => {
-                const style = styleSheet[key];
                 // @ts-ignore
-                finalStyleSheet[key] = flattenMediaStyle(style);
+                finalStyleSheet[key] = flattenMediaStyle(styleSheet[key]);
             });
 
-            // @ts-ignore
-            return StyleSheet.create(finalStyleSheet);
+            return StyleSheet.create(finalStyleSheet) as StyleSheet<T>;
         }
     };
 }
